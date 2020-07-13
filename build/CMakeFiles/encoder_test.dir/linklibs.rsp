@@ -1,1 +1,0 @@
-  -LC:/lib_install/lib  -lavutil -lm -luser32 -lbcrypt -lswresample -lavutil -lm -luser32 -lbcrypt -lavcodec -liconv -lz -lmfplat -lmfuuid -lstrmiids -lole32 -lswresample -lavutil -lm -luser32 -lbcrypt -lavcodec -liconv -lz -lmfplat -lmfuuid -lstrmiids -lole32 -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32 

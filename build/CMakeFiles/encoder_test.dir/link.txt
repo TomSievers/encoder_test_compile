@@ -1,3 +1,0 @@
-"C:\Program Files\CMake\bin\cmake.exe" -E rm -f CMakeFiles\encoder_test.dir/objects.a
-C:\mingw64\mingw64\bin\ar.exe cr CMakeFiles\encoder_test.dir/objects.a @CMakeFiles\encoder_test.dir\objects1.rsp
-C:\mingw64\mingw64\bin\g++.exe    -Wl,--whole-archive CMakeFiles\encoder_test.dir/objects.a -Wl,--no-whole-archive  -o encoder_test.exe -Wl,--out-implib,libencoder_test.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles\encoder_test.dir\linklibs.rsp
