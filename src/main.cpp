@@ -1,4 +1,4 @@
-
+#include "Encoder.hpp"
 
 int main(int argc, char const *argv[])
 {
