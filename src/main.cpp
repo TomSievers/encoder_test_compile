@@ -4,6 +4,10 @@
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
 
+#include <boost/asio.hpp>
+
+#include <chrono>
+
 #include <iostream>
 
 int main(int argc, char const *argv[])
@@ -13,12 +17,25 @@ int main(int argc, char const *argv[])
 
     cv::Mat img = cv::imread("../megumin.jpg");
 
+    cv::Mat frame;
+
+    boost::asio::streambuf buf;
+
+    std::ostream stream(&buf);
+
+    cv::cvtColor(img, frame, cv::COLOR_BGR2YUV_I420);
+    frame.resize(1080);
+
+    auto start = std::chrono::high_resolution_clock::now();
+
     for(int i = 0; i < 30; ++i)
     {
-        cv::cvtColor(img, img, cv::COLOR_BGR2YUV_I420);
-        img.resize(1080);
-        encoder.encode(img, std::cout);
+        encoder.encode(frame, stream);
     }
+
+    auto end = std::chrono::high_resolution_clock::now();
+
+    std::cout << "Elapsed: " <<  std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count() * 1e-9 << std::endl;
     
     return 0;
 }

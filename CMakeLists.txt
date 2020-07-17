@@ -1,6 +1,12 @@
 project (encoder_test)
 cmake_minimum_required(VERSION 3.10)
 
+set(Boost_USE_STATIC_LIBS ON)
+set(Boost_USE_STATIC_RUNTIME ON)
+set(Boost_USE_MULTITHREADED ON)
+
+find_package(Boost 1.68 REQUIRED COMPONENTS system)
+
 find_package(OpenCV REQUIRED)
 
 find_package(PkgConfig REQUIRED)
@@ -28,8 +34,8 @@ endforeach()
 
 link_directories(${AVCODEC_LIBRARY_DIRS})
 
-include_directories(${PKG_CONFIG_INCLUDES} ${OpenCV_INCLUDE_DIRS})
+include_directories(${PKG_CONFIG_INCLUDES} ${OpenCV_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
 
 add_executable(${PROJECT_NAME} src/main.cpp src/Encoder.cpp src/Codec.cpp)
 
-target_link_libraries(${PROJECT_NAME} ${PKG_CONFIG_LIBRARIES} ${OpenCV_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} ${PKG_CONFIG_LIBRARIES} ${OpenCV_LIBRARIES} ${Boost_LIBRARIES})

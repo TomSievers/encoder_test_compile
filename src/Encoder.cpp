@@ -80,13 +80,19 @@ void Encoder::copyToFrame(const cv::Mat& frame)
 		throw std::runtime_error("Unable to make frame writeable");
 	}
 
-	cv::Mat channels[4];
+	cv::Mat channels[8];
 
 	cv::split(frame, channels);
 
-	for(int channel = 0; channel < frame.channels(); ++channel)
+	for (std::size_t y = 0; y < _codec_context->height; y++) 
 	{
-		_frame->data[channel] = channels[channel].data;
+		for (std::size_t x = 0; x < _codec_context->width; x++) 
+		{
+			for(int channel = 0; channel < frame.channels(); ++channel)
+			{
+				_frame->data[channel][y * _frame->linesize[channel] + x] = channels[channel].data[y * _frame->linesize[channel] + x];
+			}
+		}
 	}
 }
 
