@@ -1,6 +1,8 @@
 project (encoder_test)
 cmake_minimum_required(VERSION 3.10)
 
+find_package(OpenCV REQUIRED)
+
 find_package(PkgConfig REQUIRED)
 
 set(PKG_CONFIG_LIBS "libavdevice"
@@ -26,8 +28,8 @@ endforeach()
 
 link_directories(${AVCODEC_LIBRARY_DIRS})
 
-add_executable(${PROJECT_NAME} src/main.cpp src/Encoder.cpp)
+include_directories(${PKG_CONFIG_INCLUDES} ${OpenCV_INCLUDE_DIRS})
 
-target_include_directories(${PROJECT_NAME} PUBLIC ${PKG_CONFIG_INCLUDES})
+add_executable(${PROJECT_NAME} src/main.cpp src/Encoder.cpp src/Codec.cpp)
 
-target_link_libraries(${PROJECT_NAME} ${PKG_CONFIG_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} ${PKG_CONFIG_LIBRARIES} ${OpenCV_LIBRARIES})

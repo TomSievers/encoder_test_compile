@@ -3,12 +3,11 @@
 
 #include <string>
 #include <cstdint>
-#include <memory>
+#include <ostream>
 
-extern "C"
-{
-	#include <libavcodec/avcodec.h>
-}
+#include <opencv2/core/mat.hpp>
+
+#include "Codec.hpp"
 
 struct Resolution
 {
@@ -16,23 +15,22 @@ struct Resolution
 	uint16_t height;
 };
 
-class Encoder
+class Encoder : public Codec
 {
 public:
 	Encoder(const std::string& codec_name, const Resolution& res, const AVPixelFormat& format, const uint32_t bit_rate, uint8_t frame_rate);
+
 	Encoder(const char* codec_name, const Resolution& res, const AVPixelFormat& format, const uint32_t bit_rate, uint8_t frame_rate);
+
 	Encoder(const AVCodecID& codec_id, const Resolution& res, const AVPixelFormat& format, const uint32_t bit_rate, uint8_t frame_rate);
-	~Encoder();
 
-	
+	virtual ~Encoder();
+
+	void encode(const cv::Mat& frame, std::ostream& output);
 private:
-	void init(const std::string& codec_name, const Resolution& res, const AVPixelFormat& format, const uint32_t bit_rate, uint8_t frame_rate);
+	void copyToFrame(const cv::Mat& frame);
 
-	AVCodec* _codec;
-	AVCodecContext* _codec_context;
-	
-	AVPacket* _packet;
-	AVFrame* _frame;
+	void init(const std::string& codec_name, const Resolution& res, const AVPixelFormat& format, const uint32_t bit_rate, uint8_t frame_rate);
 };
 
 
