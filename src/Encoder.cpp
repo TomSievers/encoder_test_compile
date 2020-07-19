@@ -47,7 +47,6 @@ void Encoder::init(const std::string& codec_name, const Resolution& res, const A
 	int ret = avcodec_open2(_codec_context, _codec, NULL);
 	if(ret < 0)
 	{
-		
 		char error[AV_ERROR_MAX_STRING_SIZE];
 		av_make_error_string(error, AV_ERROR_MAX_STRING_SIZE, ret);
 		throw std::runtime_error("Unable to open codec " + std::string(error));
@@ -80,19 +79,11 @@ void Encoder::copyToFrame(const cv::Mat& frame)
 		throw std::runtime_error("Unable to make frame writeable");
 	}
 
-	cv::Mat channels[8];
+	cv::split(frame, _channels);
 
-	cv::split(frame, channels);
-
-	for (std::size_t y = 0; y < _codec_context->height; y++) 
+	for(int channel = 0; channel < frame.channels(); ++channel)
 	{
-		for (std::size_t x = 0; x < _codec_context->width; x++) 
-		{
-			for(int channel = 0; channel < frame.channels(); ++channel)
-			{
-				_frame->data[channel][y * _frame->linesize[channel] + x] = channels[channel].data[y * _frame->linesize[channel] + x];
-			}
-		}
+		_frame->data[channel] = _channels[channel].data;
 	}
 }
 
@@ -130,4 +121,5 @@ void Encoder::encode(const cv::Mat& frame, std::ostream& output)
 
 Encoder::~Encoder()
 {
+	avcodec_send_frame(_codec_context, NULL);
 }

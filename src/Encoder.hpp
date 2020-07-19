@@ -31,6 +31,8 @@ private:
 	void copyToFrame(const cv::Mat& frame);
 
 	void init(const std::string& codec_name, const Resolution& res, const AVPixelFormat& format, const uint32_t bit_rate, uint8_t frame_rate);
+
+	cv::Mat _channels[8];
 };
 
 

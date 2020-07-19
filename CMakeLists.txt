@@ -36,6 +36,6 @@ link_directories(${AVCODEC_LIBRARY_DIRS})
 
 include_directories(${PKG_CONFIG_INCLUDES} ${OpenCV_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
 
-add_executable(${PROJECT_NAME} src/main.cpp src/Encoder.cpp src/Codec.cpp)
+add_executable(${PROJECT_NAME} src/main.cpp src/Codec.cpp src/Encoder.cpp src/Decoder.cpp)
 
 target_link_libraries(${PROJECT_NAME} ${PKG_CONFIG_LIBRARIES} ${OpenCV_LIBRARIES} ${Boost_LIBRARIES})
