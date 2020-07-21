@@ -2,26 +2,29 @@
 
 #include <stdexcept>
 
+#include <iostream>
+
 Decoder::Decoder(const std::string& codec_name)
-    : Codec(codec_name.c_str()),
+    : Codec(codec_name.c_str(), avcodec_find_decoder_by_name),
     _parser(av_parser_init(_codec->id))
 {
 }
 
 Decoder::Decoder(const char* codec_name)
-    : Codec(codec_name),
+    : Codec(codec_name, avcodec_find_decoder_by_name),
     _parser(av_parser_init(_codec->id))
 {
 }
 
 Decoder::Decoder(const AVCodecID& codec_id)
-    : Codec(codec_id),
+    : Codec(codec_id, avcodec_find_decoder),
     _parser(av_parser_init(_codec->id))
 {
 }
 
 void Decoder::init()
 {
+
     int ret = avcodec_open2(_codec_context, _codec, NULL);
 	if(ret < 0)
 	{
@@ -29,6 +32,10 @@ void Decoder::init()
 		av_make_error_string(error, AV_ERROR_MAX_STRING_SIZE, ret);
 		throw std::runtime_error("Unable to open codec " + std::string(error));
 	}
+
+    _parser = av_parser_init(_codec->id);
+
+    
 }
 
 uint64_t Decoder::parse(std::string& bitstream)
@@ -74,4 +81,5 @@ void Decoder::decode(cv::Mat& out)
 Decoder::~Decoder()
 {
     avcodec_send_packet(_codec_context, NULL);
+    av_parser_close(_parser);
 }

@@ -1,3 +1,5 @@
 build
 .vscode
 *.jpg
+*.mpg
+*.mp4

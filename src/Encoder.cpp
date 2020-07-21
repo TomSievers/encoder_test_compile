@@ -10,19 +10,19 @@ extern "C"
 #include <opencv2/core.hpp>
 
 Encoder::Encoder(const std::string& codec_name, const Resolution& res, const AVPixelFormat& format, const uint32_t bit_rate, uint8_t frame_rate) 
-	: Codec(codec_name.c_str())
+	: Codec(codec_name.c_str(), avcodec_find_encoder_by_name)
 {
 	init(codec_name, res, format, bit_rate, frame_rate);
 }
 
 Encoder::Encoder(const char* codec_name, const Resolution& res, const AVPixelFormat& format, const uint32_t bit_rate, uint8_t frame_rate)
-	: Codec(codec_name)
+	: Codec(codec_name, avcodec_find_encoder_by_name)
 {
 	init(codec_name, res, format, bit_rate, frame_rate);
 }
 
 Encoder::Encoder(const AVCodecID& codec_id, const Resolution& res, const AVPixelFormat& format, const uint32_t bit_rate, uint8_t frame_rate)
-	: Codec(codec_id)
+	: Codec(codec_id, avcodec_find_encoder)
 {
 	init(_codec->long_name, res, format, bit_rate, frame_rate);
 }

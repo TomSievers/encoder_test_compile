@@ -1,6 +1,8 @@
 #ifndef CODEC_HPP
 #define CODEC_HPP
 
+#include "CodecType.hpp"
+
 extern "C"
 {
 	#include <libavcodec/avcodec.h>
@@ -10,9 +12,9 @@ class Codec
 {
 public:
 
-    Codec(const AVCodecID& codec_id);
+    Codec(const AVCodecID& codec_id, std::function<AVCodec*(AVCodecID)> find_codec);
 
-    Codec(const char* codec_name);
+    Codec(const char* codec_name, std::function<AVCodec*(const char *)> find_codec);
 
     AVCodec* getCodec();
 

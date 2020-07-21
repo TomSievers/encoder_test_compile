@@ -24,6 +24,8 @@ private:
 
     AVCodecParserContext* _parser;
 
+    static CodecType _codec_functions;
+
 };
 
 

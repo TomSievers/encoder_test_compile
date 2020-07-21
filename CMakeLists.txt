@@ -38,4 +38,8 @@ include_directories(${PKG_CONFIG_INCLUDES} ${OpenCV_INCLUDE_DIRS} ${Boost_INCLUD
 
 add_executable(${PROJECT_NAME} src/main.cpp src/Codec.cpp src/Encoder.cpp src/Decoder.cpp)
 
+add_executable(${PROJECT_NAME}_c src/main.c)
+
 target_link_libraries(${PROJECT_NAME} ${PKG_CONFIG_LIBRARIES} ${OpenCV_LIBRARIES} ${Boost_LIBRARIES})
+
+target_link_libraries(${PROJECT_NAME}_c ${PKG_CONFIG_LIBRARIES})
