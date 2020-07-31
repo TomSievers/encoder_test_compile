@@ -1,6 +1,10 @@
-#include "Encoder.hpp"
+#include "VideoEncoder.hpp"
 
 #include "Decoder.hpp"
+
+#include "Muxer.hpp"
+
+#include "Demuxer.hpp"
 
 #include <opencv2/core.hpp>
 #include <opencv2/highgui.hpp>
@@ -10,37 +14,24 @@
 
 #include <chrono>
 
-#include <iostream>
+#include <fstream>
 
 int main(int argc, char const *argv[])
 {
+    (void) argc;
+    (void) argv;
+
     Resolution res = {.width=1920, .height=1080};
-    Encoder encoder(AV_CODEC_ID_H264, res, AV_PIX_FMT_YUV420P, 4000000, 30);
+    VideoEncoder encoder(AV_CODEC_ID_H264, res, AV_PIX_FMT_YUV420P, 4000000, 30);
 
     Decoder decoder(AV_CODEC_ID_H264);
 
-    cv::Mat img = cv::imread("../megumin.jpg");
+    std::ofstream file;
 
-    cv::Mat frame;
+    Muxer muxer(file, "mp4");
 
-    std::stringstream buf;
+    muxer.writeHeader();
 
-    cv::cvtColor(img, frame, cv::COLOR_BGR2YUV_I420);
-    frame.resize(1080);
-
-    for(int i = 0; i < 5; ++i)
-    {
-        encoder.encode(frame, buf);
-
-        std::string bitstream = buf.str();
-
-        decoder.parse(bitstream);
-
-        decoder.decode(frame);
-
-        cv::imshow("test", frame);
-
-        cv::waitKey(1);
-    }
+    
     return 0;
 }

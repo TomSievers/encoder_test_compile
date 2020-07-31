@@ -8,9 +8,13 @@ extern "C"
 	#include <libavcodec/avcodec.h>
 }
 
+/**
+ * @brief DO NOT USE, Is the base class for every encoder
+ * 
+ */
 class Codec
 {
-public:
+protected:
 
     Codec(const AVCodecID& codec_id, std::function<AVCodec*(AVCodecID)> find_codec);
 
@@ -22,7 +26,6 @@ public:
 
     virtual ~Codec();
 
-protected:
     AVCodec* _codec;
 	AVCodecContext* _codec_context;
 	

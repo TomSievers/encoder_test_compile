@@ -1,4 +1,4 @@
-project (encoder_test)
+project (VideoEncoder_test)
 cmake_minimum_required(VERSION 3.10)
 
 set(Boost_USE_STATIC_LIBS ON)
@@ -10,6 +10,8 @@ find_package(Boost 1.68 REQUIRED COMPONENTS system)
 find_package(OpenCV REQUIRED)
 
 find_package(PkgConfig REQUIRED)
+
+add_definitions("-Wall -Wextra -Wconversion")
 
 set(PKG_CONFIG_LIBS "libavdevice"
     "libavformat"
@@ -36,10 +38,7 @@ link_directories(${AVCODEC_LIBRARY_DIRS})
 
 include_directories(${PKG_CONFIG_INCLUDES} ${OpenCV_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
 
-add_executable(${PROJECT_NAME} src/main.cpp src/Codec.cpp src/Encoder.cpp src/Decoder.cpp)
-
-add_executable(${PROJECT_NAME}_c src/main.c)
+add_executable(${PROJECT_NAME} src/main.cpp src/Codec.cpp src/VideoEncoder.cpp src/Decoder.cpp src/Muxer.cpp)
 
 target_link_libraries(${PROJECT_NAME} ${PKG_CONFIG_LIBRARIES} ${OpenCV_LIBRARIES} ${Boost_LIBRARIES})
 
-target_link_libraries(${PROJECT_NAME}_c ${PKG_CONFIG_LIBRARIES})

@@ -3,8 +3,6 @@
 #include <stdexcept>
 #include <string>
 
-
-
 Codec::Codec(const AVCodecID& codec_id, std::function<AVCodec*(AVCodecID)> find_codec)
     : _codec(find_codec(codec_id)), 
 	_codec_context(avcodec_alloc_context3(_codec)),
@@ -25,7 +23,6 @@ Codec::Codec(const char* codec_name, std::function<AVCodec*(const char *)> find_
 
 void Codec::checkPointers()
 {
-	av_log_set_level(AV_LOG_TRACE);
 	if(_codec == NULL)
 	{
 		throw std::runtime_error("Unable to create codec");

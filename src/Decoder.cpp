@@ -41,7 +41,7 @@ void Decoder::init()
 uint64_t Decoder::parse(std::string& bitstream)
 {
     int ret = av_parser_parse2(_parser, _codec_context, &_packet->data, &_packet->size,
-        reinterpret_cast<const uint8_t *>(bitstream.c_str()), bitstream.size(), AV_NOPTS_VALUE, AV_NOPTS_VALUE, 0);
+        reinterpret_cast<const uint8_t *>(bitstream.c_str()), static_cast<int>(bitstream.size()), AV_NOPTS_VALUE, AV_NOPTS_VALUE, 0);
 
     if(ret < 0)
     {

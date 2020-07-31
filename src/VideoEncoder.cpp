@@ -1,4 +1,4 @@
-#include "Encoder.hpp"
+#include "VideoEncoder.hpp"
 
 #include <stdexcept>
 
@@ -9,25 +9,25 @@ extern "C"
 
 #include <opencv2/core.hpp>
 
-Encoder::Encoder(const std::string& codec_name, const Resolution& res, const AVPixelFormat& format, const uint32_t bit_rate, uint8_t frame_rate) 
+VideoEncoder::VideoEncoder(const std::string& codec_name, const Resolution& res, const AVPixelFormat& format, const uint32_t bit_rate, uint8_t frame_rate) 
 	: Codec(codec_name.c_str(), avcodec_find_encoder_by_name)
 {
-	init(codec_name, res, format, bit_rate, frame_rate);
+	init(res, format, bit_rate, frame_rate);
 }
 
-Encoder::Encoder(const char* codec_name, const Resolution& res, const AVPixelFormat& format, const uint32_t bit_rate, uint8_t frame_rate)
+VideoEncoder::VideoEncoder(const char* codec_name, const Resolution& res, const AVPixelFormat& format, const uint32_t bit_rate, uint8_t frame_rate)
 	: Codec(codec_name, avcodec_find_encoder_by_name)
 {
-	init(codec_name, res, format, bit_rate, frame_rate);
+	init(res, format, bit_rate, frame_rate);
 }
 
-Encoder::Encoder(const AVCodecID& codec_id, const Resolution& res, const AVPixelFormat& format, const uint32_t bit_rate, uint8_t frame_rate)
+VideoEncoder::VideoEncoder(const AVCodecID& codec_id, const Resolution& res, const AVPixelFormat& format, const uint32_t bit_rate, uint8_t frame_rate)
 	: Codec(codec_id, avcodec_find_encoder)
 {
-	init(_codec->long_name, res, format, bit_rate, frame_rate);
+	init(res, format, bit_rate, frame_rate);
 }
 
-void Encoder::init(const std::string& codec_name, const Resolution& res, const AVPixelFormat& format, const uint32_t bit_rate, uint8_t frame_rate)
+void VideoEncoder::init(const Resolution& res, const AVPixelFormat& format, const uint32_t bit_rate, uint8_t frame_rate)
 {
 	_codec_context->pix_fmt = format;
 	_codec_context->width = res.width;
@@ -65,7 +65,7 @@ void Encoder::init(const std::string& codec_name, const Resolution& res, const A
 	}
 }
 
-void Encoder::copyToFrame(const cv::Mat& frame)
+void VideoEncoder::copyToFrame(const cv::Mat& frame)
 {
 	if(frame.rows != _codec_context->height || frame.cols != _codec_context->width)
 	{
@@ -87,7 +87,7 @@ void Encoder::copyToFrame(const cv::Mat& frame)
 	}
 }
 
-void Encoder::encode(const cv::Mat& frame, std::ostream& output)
+void VideoEncoder::encode(const cv::Mat& frame, std::ostream& output)
 {
 	copyToFrame(frame);
 
@@ -119,7 +119,7 @@ void Encoder::encode(const cv::Mat& frame, std::ostream& output)
 	++_frame->pts;
 }
 
-Encoder::~Encoder()
+VideoEncoder::~VideoEncoder()
 {
 	avcodec_send_frame(_codec_context, NULL);
 }
