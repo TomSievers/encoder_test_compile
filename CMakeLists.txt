@@ -38,7 +38,20 @@ link_directories(${AVCODEC_LIBRARY_DIRS})
 
 include_directories(${PKG_CONFIG_INCLUDES} ${OpenCV_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
 
-add_executable(${PROJECT_NAME} src/main.cpp src/Codec.cpp src/VideoEncoder.cpp src/Decoder.cpp src/Muxer.cpp)
+set(SRC_FILES
+    src/main.cpp 
+    src/Codec.cpp 
+    src/VideoEncoder.cpp 
+    src/Decoder.cpp 
+    src/Muxer.cpp
+    src/OutputStream.cpp
+)
+
+add_executable(${PROJECT_NAME} ${SRC_FILES})
+
+if(UNIX)
+    target_link_libraries(${PROJECT_NAME} pthread)
+endif()
 
 target_link_libraries(${PROJECT_NAME} ${PKG_CONFIG_LIBRARIES} ${OpenCV_LIBRARIES} ${Boost_LIBRARIES})
 

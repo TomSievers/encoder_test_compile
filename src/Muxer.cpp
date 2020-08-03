@@ -40,7 +40,7 @@ Muxer::Muxer(std::ostream& output_stream, const std::string& output_format)
 
     _format = _format_context->oformat;
 
-    Resolution res = {.width=1920, .height=1080};
+    /*Resolution res = {.width=1920, .height=1080};
 
     if(_format->video_codec != AV_CODEC_ID_NONE)
     {
@@ -50,7 +50,7 @@ Muxer::Muxer(std::ostream& output_stream, const std::string& output_format)
     if(_format->audio_codec != AV_CODEC_ID_NONE)
     {
         _audio_encoder = std::make_shared<VideoEncoder>(_format->audio_codec, res, AV_PIX_FMT_YUVJ420P, 4000000, 30);
-    }
+    }*/
 }
 
 void Muxer::initFile(const char* file_name)

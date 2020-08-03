@@ -1,6 +1,8 @@
 #ifndef MUXER_HPP
 #define MUXER_HPP
 
+#include <string>
+
 extern "C"
 {
     #include <libavformat/avformat.h>
