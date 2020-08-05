@@ -15,6 +15,10 @@ struct VideoOptions
 struct AudioOptions
 {
     AVCodecID codec;
+    int sample_rate;
+    AVSampleFormat sample_fmt;
+    uint8_t n_channels;
+    uint64_t bit_rate;
 };
 
 struct StreamOptions

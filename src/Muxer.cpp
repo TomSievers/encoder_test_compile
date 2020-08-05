@@ -40,19 +40,23 @@ Muxer::Muxer(std::ostream& output_stream, const std::string& output_format)
 
     _format = _format_context->oformat;
 
-    Resolution res = {.width=1920, .height=1080};
+    std::cout << _format->audio_codec << std::endl;
+    std::cout << "---\n" << _format->video_codec << std::endl;
 
     StreamOptions options;
 
     options.audio_opt.codec = _format->audio_codec;
+    options.audio_opt.sample_rate = 44100;
+    options.audio_opt.sample_fmt = AV_SAMPLE_FMT_FLT;
+    options.audio_opt.n_channels = 2;
+    options.audio_opt.bit_rate = 640000;
+
+    Resolution res = {.width=1920, .height=1080};
+
     options.video_opt.codec = _format->video_codec;
-
     options.video_opt.resolution = res;
-
     options.video_opt.format = AV_PIX_FMT_YUVJ420P;
-
     options.video_opt.bit_rate = 4000000;
-
     options.video_opt.frame_rate = 30;
 
     _output = std::make_unique<OutputStream>(_format_context, options, output_stream);

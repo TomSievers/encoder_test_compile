@@ -30,9 +30,15 @@ OutputStream::OutputStream(AVFormatContext* format_context, const StreamOptions&
 
     }
 
-    if(options.video_opt.codec != AV_CODEC_ID_NONE)
+    if(options.audio_opt.codec != AV_CODEC_ID_NONE)
     {
-        _audio_encoder = std::make_shared<AudioEncoder>();
+        _audio_encoder = std::make_shared<AudioEncoder>(
+            options.audio_opt.codec,
+            options.audio_opt.sample_rate,
+            options.audio_opt.sample_fmt,
+            options.audio_opt.n_channels,
+            options.audio_opt.bit_rate
+        );
 
         _audio_stream = avformat_new_stream(format_context, NULL);
 
@@ -52,7 +58,15 @@ OutputStream::OutputStream(AVFormatContext* format_context, const StreamOptions&
     
     if (format_context->oformat->flags & AVFMT_GLOBALHEADER)
     {
-        _video_encoder->getContext()->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
+        if(_video_encoder != nullptr)
+        {
+            _video_encoder->getContext()->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
+        }
+
+        if(_audio_encoder != nullptr)
+        {
+            _audio_encoder->getContext()->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
+        }
     }
 
 }

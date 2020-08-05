@@ -1,30 +1,91 @@
 #include "AudioEncoder.hpp"
 
-AudioEncoder::AudioEncoder(/* args */)
-    : Codec(AV_CODEC_ID_ALAC, avcodec_find_encoder)
+#include <iostream>
+
+extern "C"
 {
-        c->sample_fmt  = (*codec)->sample_fmts ?
-        (*codec)->sample_fmts[0] : AV_SAMPLE_FMT_FLTP;
-        c->bit_rate    = 64000;
-        c->sample_rate = 44100;
-        if ((*codec)->supported_samplerates) {
-            c->sample_rate = (*codec)->supported_samplerates[0];
-            for (i = 0; (*codec)->supported_samplerates[i]; i++) {
-                if ((*codec)->supported_samplerates[i] == 44100)
-                    c->sample_rate = 44100;
-            }
+    #include <libavutil/samplefmt.h>
+    #include <libavcodec/avcodec.h>
+}
+
+
+AudioEncoder::AudioEncoder(const AVCodecID& codec, int sample_rate, const AVSampleFormat& sample_format, uint8_t n_channels, uint32_t bit_rate)
+    : Codec(codec, avcodec_find_encoder)
+{
+    _codec_context->bit_rate = bit_rate;
+
+    if(!checkSampleFormat(sample_format))
+    {
+        std::cout << "Unsupported sample format default to first supported format" << std::endl;
+        _codec_context->sample_fmt = _codec->sample_fmts ? _codec->sample_fmts[0] : AV_SAMPLE_FMT_FLTP;
+    }
+
+    _codec_context->sample_fmt = sample_format;
+
+    _codec_context->sample_rate = 44100;
+
+    if(checkSampleRate(sample_rate))
+    {
+        _codec_context->sample_rate = sample_rate;
+    }
+
+    _codec_context->channels = n_channels;
+    _codec_context->channel_layout = selectChannelLayout(n_channels);
+}
+
+bool AudioEncoder::checkSampleFormat(const AVSampleFormat& sample_fmt)
+{
+    const enum AVSampleFormat *p = _codec->sample_fmts;
+    while (*p != AV_SAMPLE_FMT_NONE) 
+    {
+        std::cout << *p << std::endl;
+        if (*p == sample_fmt)
+        {
+            return true;
         }
-        c->channels        = av_get_channel_layout_nb_channels(c->channel_layout);
-        c->channel_layout = AV_CH_LAYOUT_STEREO;
-        if ((*codec)->channel_layouts) {
-            c->channel_layout = (*codec)->channel_layouts[0];
-            for (i = 0; (*codec)->channel_layouts[i]; i++) {
-                if ((*codec)->channel_layouts[i] == AV_CH_LAYOUT_STEREO)
-                    c->channel_layout = AV_CH_LAYOUT_STEREO;
-            }
+        ++p;
+    }
+    return false;
+}
+
+bool AudioEncoder::checkSampleRate(int sample_rate)
+{
+    if(_codec->supported_samplerates == NULL)
+    {
+        return false;
+    }
+
+    const int* p = _codec->supported_samplerates;
+
+    while(*p)
+    {
+        if(*p == sample_rate)
+        {
+            return true;
         }
-        c->channels        = av_get_channel_layout_nb_channels(c->channel_layout);
-        ost->st->time_base = (AVRational){ 1, c->sample_rate };
+        ++p;
+    }
+    return false;
+}
+
+uint64_t AudioEncoder::selectChannelLayout(uint8_t n_channels)
+{
+    if(!_codec->channel_layouts)
+    {
+        return AV_CH_LAYOUT_STEREO;
+    }
+        
+    const uint64_t* p = _codec->channel_layouts;
+
+    while(*p)
+    {
+        if(av_get_channel_layout_nb_channels(*p) == n_channels)
+        {
+            return *p;
+        }
+    }
+
+    return AV_CH_LAYOUT_STEREO;
 }
 
 AudioEncoder::~AudioEncoder()
