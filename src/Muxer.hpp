@@ -3,6 +3,8 @@
 
 #include <string>
 
+#include "OutputStream.hpp"
+
 extern "C"
 {
     #include <libavformat/avformat.h>
@@ -36,7 +38,7 @@ private:
 
     AVOutputFormat* _format;
 
-    
+    std::unique_ptr<OutputStream> _output;
 };
 
 

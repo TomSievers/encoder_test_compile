@@ -16,14 +16,14 @@ extern "C"
 class OutputStream
 {
 public:
-    OutputStream(AVFormatContext* format_context, const VideoOptions& options, std::ostream& output);
-    OutputStream(AVFormatContext* format_context, const AudioOptions& options, std::ostream& output);
+    OutputStream(AVFormatContext* format_context, const StreamOptions& options, std::ostream& output);
     virtual ~OutputStream();
 
     void writeVideo(const cv::Mat& frame);
     void writeAudio();
 private:
-    AVStream* _stream;
+    AVStream* _video_stream;
+    AVStream* _audio_stream;
 
     std::ostream& _output;
 

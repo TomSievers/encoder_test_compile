@@ -31,7 +31,6 @@ int main(int argc, char const *argv[])
     Muxer muxer(file, "mp4");
 
     muxer.writeHeader();
-
     
     return 0;
 }

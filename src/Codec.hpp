@@ -14,15 +14,16 @@ extern "C"
  */
 class Codec
 {
+public:
+    AVCodec* getCodec();
+
+    AVCodecContext* getContext();
+
 protected:
 
     Codec(const AVCodecID& codec_id, std::function<AVCodec*(AVCodecID)> find_codec);
 
     Codec(const char* codec_name, std::function<AVCodec*(const char *)> find_codec);
-
-    AVCodec* getCodec();
-
-    AVCodecContext* getContext();
 
     virtual ~Codec();
 

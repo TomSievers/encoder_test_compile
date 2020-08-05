@@ -45,6 +45,7 @@ set(SRC_FILES
     src/Decoder.cpp 
     src/Muxer.cpp
     src/OutputStream.cpp
+    src/AudioEncoder.cpp
 )
 
 add_executable(${PROJECT_NAME} ${SRC_FILES})

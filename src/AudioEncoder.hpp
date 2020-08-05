@@ -5,21 +5,12 @@
 
 class AudioEncoder : public Codec
 {
-private:
-    /* data */
 public:
     AudioEncoder(/* args */);
     virtual ~AudioEncoder();
+
+private:
+    /* data */
 };
-
-AudioEncoder::AudioEncoder(/* args */)
-    : Codec(AV_CODEC_ID_ALAC, avcodec_find_encoder)
-{
-}
-
-AudioEncoder::~AudioEncoder()
-{
-}
-
 
 #endif //AUDIOENCODER_HPP

@@ -15,12 +15,12 @@ struct VideoOptions
 struct AudioOptions
 {
     AVCodecID codec;
-}
+};
 
 struct StreamOptions
 {
     VideoOptions video_opt;
     AudioOptions audio_opt;
-}
+};
 
 #endif //STREAM_OPTIONS_HPP
