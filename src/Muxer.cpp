@@ -3,17 +3,21 @@
 #include <iostream>
 #include <functional>
 
-Muxer::Muxer(const std::string& file_name)
+#include "StreamIO.hpp"
+
+Muxer::Muxer(const std::string& file_name, StreamOptions& options)
+    : _io_context(NULL), _io_buf(NULL)
 {
-    initFile(file_name.c_str());
+    initFile(file_name.c_str(), options);
 }
 
-Muxer::Muxer(const char* file_name)
+Muxer::Muxer(const char* file_name, StreamOptions& options)
+    : _io_context(NULL), _io_buf(NULL)
 {
-    initFile(file_name);
+    initFile(file_name, options);
 }
 
-Muxer::Muxer(std::ostream& output_stream, const std::string& output_format)
+Muxer::Muxer(std::ostream& output_stream, const std::string& output_format, StreamOptions& options)
     : _io_buf(reinterpret_cast<uint8_t *>(av_malloc(sizeof(uint8_t)*_io_buf_size)))
 {
     if(_io_buf == NULL)
@@ -21,7 +25,7 @@ Muxer::Muxer(std::ostream& output_stream, const std::string& output_format)
         throw(std::runtime_error("Out of memory, unable to allocate buffer of size: " + std::to_string(sizeof(uint8_t)*_io_buf_size)));
     }
 
-    _io_context = avio_alloc_context(_io_buf, _io_buf_size, 1, &output_stream, NULL, &Muxer::write, NULL);
+    _io_context = avio_alloc_context(_io_buf, _io_buf_size, 1, &output_stream, NULL, &StreamIO::write, &StreamIO::seek);
 
     if(_io_context == NULL)
     {
@@ -40,29 +44,13 @@ Muxer::Muxer(std::ostream& output_stream, const std::string& output_format)
 
     _format = _format_context->oformat;
 
-    std::cout << _format->audio_codec << std::endl;
-    std::cout << "---\n" << _format->video_codec << std::endl;
-
-    StreamOptions options;
-
     options.audio_opt.codec = _format->audio_codec;
-    options.audio_opt.sample_rate = 44100;
-    options.audio_opt.sample_fmt = AV_SAMPLE_FMT_FLT;
-    options.audio_opt.n_channels = 2;
-    options.audio_opt.bit_rate = 640000;
-
-    Resolution res = {.width=1920, .height=1080};
-
     options.video_opt.codec = _format->video_codec;
-    options.video_opt.resolution = res;
-    options.video_opt.format = AV_PIX_FMT_YUVJ420P;
-    options.video_opt.bit_rate = 4000000;
-    options.video_opt.frame_rate = 30;
 
-    _output = std::make_unique<OutputStream>(_format_context, options, output_stream);
+    _output = std::make_unique<OutputStream>(_format_context, options);
 }
 
-void Muxer::initFile(const char* file_name)
+void Muxer::initFile(const char* file_name, StreamOptions& options)
 {
     int ret = avformat_alloc_output_context2(&_format_context, NULL, NULL, file_name);
     if(ret < 0)
@@ -70,15 +58,30 @@ void Muxer::initFile(const char* file_name)
         char error[AV_ERROR_MAX_STRING_SIZE];
         av_make_error_string(error, AV_ERROR_MAX_STRING_SIZE, ret);
         throw std::runtime_error("Unable to allocate output context: " + std::string(error));
-    } else if(_format_context == NULL)
+    } 
+    if(_format_context == NULL)
     {
         std::cout << "default to mpeg output type" << std::endl;
         avformat_alloc_output_context2(&_format_context, NULL, "mpeg", file_name);
     }
 
-    _format = _format_context->oformat;
+    _format = _format_context->oformat;   
 
-    
+    options.audio_opt.codec = _format->audio_codec;
+    options.video_opt.codec = _format->video_codec;
+
+    if (!(_format->flags & AVFMT_NOFILE)) 
+    {
+        ret = avio_open(&_format_context->pb, file_name, AVIO_FLAG_WRITE);
+        if (ret < 0) 
+        {
+            char error[AV_ERROR_MAX_STRING_SIZE];
+            av_make_error_string(error, AV_ERROR_MAX_STRING_SIZE, ret);
+            throw std::runtime_error("Unable to open file " + std::string(file_name) + ": " + std::string(error));
+        }
+    }
+
+    _output = std::make_unique<OutputStream>(_format_context, options);
 }
 
 void Muxer::writeHeader()
@@ -87,26 +90,48 @@ void Muxer::writeHeader()
     if (ret < 0) {
         char error[AV_ERROR_MAX_STRING_SIZE];
 		av_make_error_string(error, AV_ERROR_MAX_STRING_SIZE, ret);
-		throw std::runtime_error("Error occurred when opening output file:  " + std::string(error));
+		throw std::runtime_error("Error occurred when writing header: " + std::string(error));
     }
 }
 
-int Muxer::write(void* opaque, uint8_t* buf, int buf_size)
+void Muxer::write(const cv::Mat& image)
 {
-    if(opaque == NULL)
-    {
-        return AVERROR(AVERROR_INVALIDDATA);
-    }
-    std::ostream* output = reinterpret_cast<std::ostream*>(opaque);
-    
-    output->write(reinterpret_cast<char*>(buf), buf_size);
-    output->flush();
-    return 0;
+    AVPacket packet;
+
+    av_init_packet(&packet);
+
+    _output->getVideoEncoder()->encodeIntoPacket(image, &packet);
+
+    _output->writeVideo(&packet);
+}
+
+void Muxer::write(const AudioFrame& sound)
+{
+    AVPacket packet;
+
+    av_init_packet(&packet);
+
+    _output->getAudioEncoder()->encodeIntoPacket(sound, &packet);
+
+    _output->writeAudio(&packet);
 }
 
 Muxer::~Muxer()
 {
-    avio_context_free(&_format_context->pb);
+    av_write_trailer(_format_context);
+    if(_io_context != NULL)
+    {
+        avio_context_free(&_format_context->pb);
+    } else if (!(_format->flags & AVFMT_NOFILE))
+    {
+        avio_closep(&_format_context->pb);
+    }
+    
+
+    if(_io_buf != NULL)
+    {
+        av_free(_io_buf);
+    }
+
     avformat_free_context(_format_context);
-    av_free(_io_buf);
 }

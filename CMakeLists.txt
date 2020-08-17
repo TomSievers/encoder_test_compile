@@ -1,4 +1,4 @@
-project (VideoEncoder_test)
+project (encoder_test)
 cmake_minimum_required(VERSION 3.10)
 
 set(Boost_USE_STATIC_LIBS ON)
@@ -7,11 +7,13 @@ set(Boost_USE_MULTITHREADED ON)
 
 find_package(Boost 1.68 REQUIRED COMPONENTS system)
 
+find_package(portaudio REQUIRED)
+
 find_package(OpenCV REQUIRED)
 
 find_package(PkgConfig REQUIRED)
 
-add_definitions("-Wall -Wextra -Wconversion")
+add_definitions("-Wall -Wextra -Wconversion -D__STDC_CONSTANT_MACROS")
 
 set(PKG_CONFIG_LIBS "libavdevice"
     "libavformat"
@@ -40,19 +42,25 @@ include_directories(${PKG_CONFIG_INCLUDES} ${OpenCV_INCLUDE_DIRS} ${Boost_INCLUD
 
 set(SRC_FILES
     src/main.cpp 
-    src/Codec.cpp 
-    src/VideoEncoder.cpp 
-    src/Decoder.cpp 
-    src/Muxer.cpp
-    src/OutputStream.cpp
-    src/AudioEncoder.cpp
+    src/Example.cpp
+    src/Muxing.cpp
+    #src/Codec.cpp 
+    #src/VideoEncoder.cpp 
+    #src/Decoder.cpp 
+    #src/Muxer.cpp
+    #src/OutputStream.cpp
+    #src/AudioEncoder.cpp
 )
 
 add_executable(${PROJECT_NAME} ${SRC_FILES})
+
+add_executable(example src/main.c)
 
 if(UNIX)
     target_link_libraries(${PROJECT_NAME} pthread)
 endif()
 
 target_link_libraries(${PROJECT_NAME} ${PKG_CONFIG_LIBRARIES} ${OpenCV_LIBRARIES} ${Boost_LIBRARIES})
+
+target_link_libraries(example ${PKG_CONFIG_LIBRARIES} m)
 

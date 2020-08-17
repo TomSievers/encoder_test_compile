@@ -55,6 +55,7 @@ void VideoEncoder::init(const Resolution& res, const AVPixelFormat& format, cons
 	_frame->width = res.width;
 	_frame->height = res.height;
 	_frame->format = format;
+	_frame->pts = 0;
 
 	ret = av_frame_get_buffer(_frame, 0);
 	if(ret < 0)
@@ -87,7 +88,16 @@ void VideoEncoder::copyToFrame(const cv::Mat& frame)
 	}
 }
 
-void VideoEncoder::encode(const cv::Mat& frame, std::ostream& output)
+void VideoEncoder::encodeIntoStream(const cv::Mat& frame, std::ostream& output)
+{
+	encodeIntoPacket(frame, _packet);
+
+	output.write(reinterpret_cast<char *>(_packet->data), _packet->size);
+
+    av_packet_unref(_packet);
+}
+
+void VideoEncoder::encodeIntoPacket(const cv::Mat& frame, AVPacket* packet)
 {
 	copyToFrame(frame);
 
@@ -100,9 +110,10 @@ void VideoEncoder::encode(const cv::Mat& frame, std::ostream& output)
 
     while (ret >= 0) 
 	{
-        ret = avcodec_receive_packet(_codec_context, _packet);
+        ret = avcodec_receive_packet(_codec_context, packet);
         if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF)
 		{
+			packet->pts = _frame->pts;
 			++_frame->pts;
 			return;
 		} else if (ret < 0) 
@@ -111,10 +122,6 @@ void VideoEncoder::encode(const cv::Mat& frame, std::ostream& output)
 			av_make_error_string(error, AV_ERROR_MAX_STRING_SIZE, ret);
             throw std::runtime_error("Error during encoding: " + std::string(error));
         }
-
-		output.write(reinterpret_cast<char *>(_packet->data), _packet->size);
-
-        av_packet_unref(_packet);
     }
 	++_frame->pts;
 }

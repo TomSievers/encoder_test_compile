@@ -60,7 +60,9 @@ public:
 	 * @param frame frame to encode
 	 * @param output output stream to put bitstream into
 	 */
-	void encode(const cv::Mat& frame, std::ostream& output);
+	void encodeIntoStream(const cv::Mat& frame, std::ostream& output);
+
+	void encodeIntoPacket(const cv::Mat& frame, AVPacket* packet);
 private:
 
 	void copyToFrame(const cv::Mat& frame);

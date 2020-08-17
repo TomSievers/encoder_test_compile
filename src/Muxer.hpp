@@ -3,6 +3,8 @@
 
 #include <string>
 
+#include <opencv2/core/mat.hpp>
+
 #include "OutputStream.hpp"
 
 extern "C"
@@ -18,17 +20,20 @@ class Muxer
 {
 
 public:
-    Muxer(const std::string& file_name);
-    Muxer(const char* file_name);
-    Muxer(std::ostream& output_stream, const std::string& output_format);
+    Muxer(const std::string& file_name, StreamOptions& options);
+    Muxer(const char* file_name, StreamOptions& options);
+    Muxer(std::ostream& output_stream, const std::string& output_format, StreamOptions& options);
 
     void writeHeader();
+
+    void write(const cv::Mat& image);
+
+    void write(const AudioFrame& sound);
 
     virtual ~Muxer();
 
 private:
-    static int write(void* opaque, uint8_t* buf, int buf_size);
-    void initFile(const char* file_name);
+    void initFile(const char* file_name, StreamOptions& options);
 
     AVFormatContext* _format_context;
 
